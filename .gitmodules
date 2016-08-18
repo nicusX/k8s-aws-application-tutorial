@@ -1,0 +1,3 @@
+[submodule "spring-hateoas-sample"]
+	path = spring-hateoas-sample
+	url = git@github.com:nicusX/spring-hateoas-sample.git
