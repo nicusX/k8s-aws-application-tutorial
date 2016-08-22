@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: h2server
+  labels:
+    name: h2server
+    tier: backend
+spec:
+  volumes:
+    - name: h2-data
+      awsElasticBlockStore:
+        volumeID: "VOLUME-ID" # REPLACE WITH ACTUALÍ VOLUME ID
+        fsType: ext4
+  containers:
+    - name: h2
+      image: nicus/k8s-sample_h2db:0.1
+      volumeMounts:
+      - mountPath: /var/h2-data
+        name: h2-data
+      ports:
+        - containerPort: 1521
+          name: h2tcp
+        - containerPort: 81
+          name: h2ui
+      readinessProbe: # Not a proper readiness check, but H2 has no proper API
+        httpGet:
+          path: /
+          port: 81
+        initialDelaySeconds: 5
+        timeoutSeconds: 1

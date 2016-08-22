@@ -28,10 +28,13 @@ COPY spring-hateoas-sample/target/${JARFILE} /opt/spring/
 # Spring profile
 ENV SPRING_PROFILE kubernetes
 
+# Load Sample data
+ENV SAMPLE_DATA false
+
 # Start the java application
 ENTRYPOINT java \
   -Dspring.profiles.active=${SPRING_PROFILE} \
-  -Dloadsampledata=true \
+  -Dloadsampledata=${SAMPLE_DATA} \
   -Dexternaldb=true \
   -Dendpoints.jmx.enabled=false \
   -Djava.security.egd=file:/dev/./urandom \

@@ -1,0 +1,38 @@
+# Spec file for deploying a single Pod of the sample application
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sample-app
+  labels:
+    name: sample-app
+    appName: sample-app
+spec:
+  volumes:
+    - name: spring-cfg
+      secret:
+        secretName: sample-app-cfg
+  containers:
+    - name: application
+      image: nicus/k8s-sample_application:0.1
+      ports:
+        - name: http
+          containerPort: 8080
+      env:
+      - name: SAMPLE_DATA
+        value: "true"
+      volumeMounts:
+        - name: spring-cfg
+          mountPath: "/etc/spring"
+          readOnly: true
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 15
+        timeoutSeconds: 1
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 30
+        timeoutSeconds: 1
