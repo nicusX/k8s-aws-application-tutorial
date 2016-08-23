@@ -1,6 +1,5 @@
-# Spec file for deploying multiple pods of my-app
 apiVersion: extensions/v1beta1
-kind: ReplicaSet
+kind: Deployment
 metadata:
   name: frontend
 spec:

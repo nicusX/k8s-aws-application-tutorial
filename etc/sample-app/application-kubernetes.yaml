@@ -7,4 +7,3 @@ extdb:
     datasource:
         url: jdbc:h2:tcp://h2server:1521/hateoas-sample
         username: sa
-        driver-class: org.h2.Driver

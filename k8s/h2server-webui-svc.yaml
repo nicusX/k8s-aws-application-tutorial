@@ -1,0 +1,12 @@
+# Exposes my-app
+apiVersion: v1
+kind: Service
+metadata:
+  name: h2server-ui
+spec:
+  type: LoadBalancer
+  selector:
+    name: h2server
+  ports:
+    - port: 80
+      targetPort: "h2ui"
