@@ -6,8 +6,20 @@ The application is quite simple, but have some moving parts.
 - A frontend component exposing an API. The application comes from an old post of mine: [Implementing HAL hypermedia REST API using Spring HATEOAS](https://opencredo.com/hal-hypermedia-api-spring-hateoas/). It will be deployed in multiple instances and exposed through a Load Balancer.
 - A database. We are using H2 as standalone server.
 - Frontend environment-specific configuration and secrets are published using a Secret
-- The db server is using a separate persistent volume for data.
+- The db server is using a separate persistent volume for data. Data won't be lost when the Pod restarts.
 
+## Requirements
+
+For running this tutorial you need:
+
+- An AWS account
+- A DockerHub account
+
+You also need the following software on your machine:
+
+- Docker (tested with v1.9.1)
+- Kubernetes (tested with v1.3.5)
+- AWS CLI (also requires Python)
 
 ## Build and publish Docker images
 
