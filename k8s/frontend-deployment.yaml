@@ -17,7 +17,7 @@ spec:
             secretName: sample-app-cfg
       containers:
         - name: application
-          image: nicus/k8s-sample_application:0.1
+          image: "<DOCKERHUB-ACCOUNT>/k8s-sample_application:0.1" # TODO REPLACE WITH YOUR DOCKERHUB ACCOUNT
           ports:
             - name: http
               containerPort: 8080

@@ -12,14 +12,15 @@ The application is quite simple, but have some moving parts.
 
 For running this tutorial you need:
 
-- An AWS account
-- A DockerHub account
+- An AWS account (running the K8s cluster is going to cost few bucks).
+- A DockerHub account (this is free)
 
 You also need the following software on your machine:
 
 - Docker (tested with v1.9.1)
 - Kubernetes (tested with v1.3.5)
 - AWS CLI (also requires Python)
+- Maven (to compile the sample Spring Boot application)
 
 ## Build and publish Docker images
 
@@ -174,18 +175,24 @@ $ aws ec2 create-volume --size 1 --availability-zone $KUBE_AWS_ZONE --volume-typ
 ```
 Take note of `VolumeId`
 
-Launch H2, passing the VolumeId (to use your own image, change DockerHub username for `image` in `k8s/h2db-pod.yaml`)
+### Create H2 db service
+
+Edit `k8s/h2server-deployment.yaml` replacing:
+
+- `<VOLUME-ID>` with the VolumeId you just created
+- `<DOCKERHUB-ACCOUNT>` with the name of your DockerHub account
+
+Create the Deployment:
 ```
-$ sed 's/VOLUME-ID/<volume-id>/' k8s/h2server-deployment.yaml | kubectl create -f -
+$ kubectl create -f k8s/h2server-deployment.yaml
 ```
 
-Create internal (not exposed) H2 Service
+Create an internal (not exposed) H2 Service:
 ```
 $ kubectl create -f k8s/h2server-svc.yaml
-service "h2server" created
 ```
 
-(Optional) Create an exposed service for H2 web UI (JDBC URL `jdbc:h2:tcp://h2server:1521/hateoas-sample`)
+(Optional) Create an exposed service for H2 web UI
 ```
 $ kubectl create -f k8s/h2server-webui-svc.yaml
 service "h2server-ui" created
@@ -204,13 +211,23 @@ Endpoints:     		10.244.0.3:81
 Session Affinity:      	None
 ```
 
+Take note of the Load Balancer DNS name (`a8263d986693011e6a24f0aa73e55bfa-1258493660.eu-west-1.elb.amazonaws.com` in the example).
 
+To connect to the database from the UI use this JDBC URL: `jdbc:h2:tcp://h2server:1521/hateoas-sample`.
+Note that schema and sample data are created by the application.
+
+### Launch the Sample Application as Pod
+
+Edit `k8s/sample-app-pod.yaml` replacing `<DOCKERHUB-ACCOUNT>` with the name of your DockerHub account
 
 Launch Sample App as single Pod (to use your own image, change DockerHub username for `image` in `k8s/sample-app-pod.yaml`.
 ```
 $ kubectl create -f k8s/sample-app-pod.yaml
 ```
-(Pod specs make the application loading sample data into the database).
+
+The Pod spec configure the application to load sample data.
+
+### Publish as Service with an external load balancer
 
 Create FrontEnd Service and Load Balancer
 ```
@@ -232,52 +249,62 @@ Port:  			<unset>	80/TCP
 
 Take note of Load Balancer Ingress DNS name and ELB Name (the trailing part of DNS name up to the first hyphen).
 
-Check ELB instance health until all Instance are *InService* (it may take a while)
+The Instances take a while to be attached to the ELB. You may monitor the ELB state until all Instances are *InService*:
 ```
 $ aws elb describe-instance-health --load-balancer-name <elb-name>
 ```
 
-Check if the application is running
+### Verify the application is working
+
+Access data through the API, exposed by the frontend ELB:
 ```
-$ curl http://<load-balancer-dns-name>/books
+$ curl http://<frontend-load-balancer-dns-name>/books
 ```
+
+### Redeploy the application with a Deployment
 
 Delete Sample App Pod
 ```
 $ kubectl delete pod sample-app
 ```
 
-Create FrontEnd Deployment (to use your own image, change DockerHub username for `image` in `k8s/frontend-deployment.yaml`)
+Edit `k8s/frontend-deployment.yaml` replacing `<DOCKERHUB-ACCOUNT>` with the name of your DockerHub account.
+
+Create FrontEnd Deployment:
 ```
 $ kubectl create -f k8s/frontend-deployment.yaml
 deployment "frontend" created
 ```
-(Deployment specs DO NOT load sample data).
 
+The Deployment specs file DO NOT make the application loading sample data on start.
 
+Monitor deployment rollout:
 ```
 $ kubectl rollout status deployment/frontend
 ```
 
+Monitor Pods coming up:
+```
+$ kubectl get pods
+```
 
-## Other operations
+## More operations
 
-### Kill H2 Pod and verify data are not lost
+### Kill the database Pod and verify data are not lost
 
 Show Pod names
 ```
 $ kubectl get pods
 NAME                        READY     STATUS    RESTARTS   AGE
 h2server-2210399524-29pfi   1/1       Running   0          5m
-...
 ```
 
-Kill the Pod
+Kill the h2server Pod
 ```
 $ kubectl delete pod h2server-2210399524-29pfi
 ```
 
-See a new Pod respawning
+... a new Pod will be automatically respawned by the ReplicaSet.
 ```
 $ kubectl get pod
 NAME                        READY     STATUS              RESTARTS   AGE
@@ -288,7 +315,7 @@ NAME                        READY     STATUS    RESTARTS   AGE
 h2server-2210399524-kql7w   1/1       Running   0          3m
 ```
 
-Query the application API
+Query the application API (no data loss):
 ```
 $ curl http://<docker-machine-ip>:8080/books
 ```
@@ -296,8 +323,9 @@ $ curl http://<docker-machine-ip>:8080/books
 
 ### Update Deployment
 
-TBD Rebuild sample application image and tag it as 0.2; push it to DockerHub
+Rebuild the sample application assigning a version tag `0.2`. Push the new version to DockerHub.
 
+Update the image used by the Deployment:
 ```
 $ kubectl set image deployment/frontend application=<dockerhub-user>/k8s-sample_application:0.2
 ....
@@ -306,6 +334,7 @@ $ kubectl rollout status deployment/frontend
 
 ### Add a Minion (Node) Instance
 
+Check the number of Minions we have:
 ```
 $ kubectl get nodes
 NAME                                         STATUS    AGE
@@ -314,12 +343,15 @@ ip-172-20-0-181.eu-west-1.compute.internal   Ready     39m
 ip-172-20-0-182.eu-west-1.compute.internal   Ready     39m
 ```
 
+To add a new Minion we have to leverage AWS Autoscaling.
+
 Edit the autoscaling Group to increase capacity
 ```
-$ aws autoscaling update-auto-scaling-group --auto-scaling-group-name kubernetes-minion-group-eu-west-1c --max-size 4 --desired-capacity 4
+$ aws autoscaling update-auto-scaling-group --auto-scaling-group-name kubernetes-minion-group-eu-west-1c \
+    --max-size 4 --desired-capacity 4
 ```
 
-...after a while..
+...after a while (minutes)..
 ```
 $ kubectl get nodes
 NAME                                         STATUS    AGE
@@ -342,29 +374,16 @@ service "frontend" deleted
 service "h2server" deleted
 service "h2server-ui" deleted
 
-
 $ kubectl delete secret sample-app-cfg
 secret "sample-app-cfg" deleted
-
 ```
 
+Or, more quickly, shut down the cluster:
+```
+$ kube-down.sh
+```
 
 Remove the volume crated for H2 data
 ```
 $ aws ec2 delete-volume --volume-id <volume-id>
-```
-
-## Useful snippets
-
-Docker cleanup: Stop and remove all local containers, remove all local volumes, remove custom network
-```
-$ docker stop $(docker ps -q);
-$ docker rm $(docker ps -a -q);
-$ docker volume rm $(docker volume ls -q);
-$ docker network rm sample_net
-```
-
-Remove all local Docker images:
-```
-$ docker rmi $(docker images -q)
 ```

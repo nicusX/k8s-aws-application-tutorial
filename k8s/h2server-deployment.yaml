@@ -14,11 +14,11 @@ spec:
       volumes:
         - name: h2-data
           awsElasticBlockStore:
-            volumeID: "VOLUME-ID" # REPLACE WITH ACTUALÍ VOLUME ID
+            volumeID: "<VOLUME-ID>" # TODO REPLACE WITH ACTUAL VOLUME ID
             fsType: ext4
       containers:
         - name: h2
-          image: nicus/k8s-sample_h2db:0.1
+          image: "<DOCKERHUB-ACCOUNT>/k8s-sample_h2db:0.1" # TODO REPLACE WITH YOUR DOCKERHUB ACCOUNT
           volumeMounts:
           - mountPath: /var/h2-data
             name: h2-data
