@@ -26,15 +26,15 @@ You also need the following software on your machine:
 
 All steps are entirely manual. Some Kubernetes specs files must be manually modified before using them.
 
-- [docs/build-images.md](Build application and Docker images and publish them to public DocherHub repositories).
-- (optional) [docs/local-docker.md](Run containers locally, in Docker)
-- [docs/k8s-cluster-aws.md](Create Kubernetes cluster on AWS)
-- [docs/launch-application-components.md](Lauch application components in Kubernetes)
-- [docs/experiment-persistent-data-volume.md](Experiment: No data is lost when db Pod restart)
-- [docs/experiment-update-image.md](Experiment: Update application image)
-- [docs/scale-nodes.md](Experiment: Scale up Nodes (Minions))
+- [Build application and Docker images and publish them to public DocherHub repositories](docs/build-images.md).
+- (optional) [Run containers locally, in Docker](docs/local-docker.md)
+- [Create Kubernetes cluster on AWS](docs/k8s-cluster-aws.md)
+- [Lauch application components in Kubernetes](docs/launch-application-components.md)
+- [Experiment: No data is lost when db Pod restart](docs/experiment-persistent-data-volume.md)
+- [Experiment: Update application image](docs/experiment-update-image.md)
+- [Experiment: Scale up Nodes (Minions)](docs/scale-nodes.md)
 
-Please, also read some [docs/notes-about-security.md](note about security).
+Please, also read some [note about security](docs/notes-about-security.md).
 
 ## Cleanup
 

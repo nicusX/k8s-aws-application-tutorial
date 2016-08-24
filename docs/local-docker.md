@@ -2,7 +2,7 @@
 
 This step is optional. To verify everything works before launching it on the remote K8s cluster, you may run the full stack locally, in Docker.
 
-We are using a [https://docs.docker.com/engine/userguide/networking/#/user-defined-networks](Docker User Defined Network) to make the component communicate. We are also using a [https://docs.docker.com/engine/reference/commandline/volume_create/#volume-create](Local Volume) for storing persistent data.
+We are using a [Docker User Defined Network](https://docs.docker.com/engine/userguide/networking/#/user-defined-networks) to make the component communicate. We are also using a [Local Volume](https://docs.docker.com/engine/reference/commandline/volume_create/#volume-create) for storing persistent data.
 
 ## Create User-Defined Network and Local Volume
 

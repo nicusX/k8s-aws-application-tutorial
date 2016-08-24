@@ -1,6 +1,6 @@
 # Rolling update of application
 
-Having used a Deployment, we may now [http://kubernetes.io/docs/user-guide/deployments/#updating-a-deployment](rollout an update of the Docker Image).
+Having used a Deployment, we may now [rollout an update of the Docker Image](http://kubernetes.io/docs/user-guide/deployments/#updating-a-deployment).
 
 You may make some (not breaking) change to the application, rebuild it tagging the application image as version 0.2 and publish to public image registry.
 
