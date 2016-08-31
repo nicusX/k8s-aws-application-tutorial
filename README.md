@@ -1,9 +1,9 @@
 # Deploying a Spring Boot application in Kubernetes, on AWS
 
-This tutorial will deploy a sample application in a Kubernetes cluster on AWS.
+This tutorial covers deploying a sample application in Kubernetes, on AWS.
 
 The application is simple, but have some different parts:
-- A Spring Boot application exposing a REST API, to scale on multiple nodes. The application comes from this post [Implementing HAL hypermedia REST API using Spring HATEOAS](https://opencredo.com/hal-hypermedia-api-spring-hateoas/).
+- A Spring Boot application exposing a REST API, to scale on multiple nodes. The application comes from an old post of mine [Implementing HAL hypermedia REST API using Spring HATEOAS](https://opencredo.com/hal-hypermedia-api-spring-hateoas/).
 - A data store, a standalone H2 server.
 - Application's environment-specific configuration and secrets injected using a K8s Secret
 - Persistent data stored on a separate EBS volume, so no data loss when the Pod restart.
